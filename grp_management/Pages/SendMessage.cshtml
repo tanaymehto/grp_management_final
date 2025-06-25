@@ -1,0 +1,100 @@
+@page
+@model grp_management.Pages.SendMessageModel
+@{
+    ViewData["Title"] = "Send Message";
+}
+
+<style>
+    .form-select,
+    .form-control {
+        background-color: #343a40; /* Dark background */
+        color: #f8f9fa; /* Light text color */
+        border-color: #495057; /* Slightly lighter border */
+    }
+
+    .form-select option {
+        background-color: #343a40; /* Ensure options are also dark */
+        color: #f8f9fa;
+    }
+
+    /* Adjust placeholder color for dark theme */
+    .form-control::placeholder {
+        color: #ced4da; /* Lighter placeholder text */
+        opacity: 0.7;
+    }
+
+    /* For focused state, if needed, though often handled by Bootstrap */
+    .form-select:focus,
+    .form-control:focus {
+        background-color: #343a40;
+        color: #f8f9fa;
+        border-color: #6c757d; /* A bit lighter on focus */
+        box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25); /* Subtle shadow */
+    }
+
+    /* Specific for textarea if it needs different styling */
+    .message-input {
+        min-height: 150px; /* Adjust as needed */
+        resize: vertical; /* Allow vertical resizing */
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="text-center mb-4">Send Message</h2>
+            <form method="post" class="needs-validation" novalidate>
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <div class="form-floating mb-3">
+                            <select asp-for="Input.GroupId" asp-items="Model.Groups" class="form-select" required>
+                                <option value="">-- Select Group --</option>
+                            </select>
+                            <label asp-for="Input.GroupId">Select Group</label>
+                            <span asp-validation-for="Input.GroupId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <select asp-for="Input.SentVia" class="form-select" required>
+                        <option value="Email">Email</option>
+                        <option value="SMS">SMS</option>
+                        <option value="WhatsApp">WhatsApp</option>
+                    </select>
+                    <label asp-for="Input.SentVia">Send Via</label>
+                    <span asp-validation-for="Input.SentVia" class="text-danger"></span>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <textarea asp-for="Input.MessageContent" class="form-control message-input" placeholder="Enter your message" required></textarea>
+                    <label asp-for="Input.MessageContent">Message</label>
+                    <span asp-validation-for="Input.MessageContent" class="text-danger"></span>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-paper-plane me-2"></i>Send Message
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Add floating label behavior
+        document.querySelectorAll('.form-control, .form-select').forEach(element => {
+            element.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+            element.addEventListener('blur', function() {
+                if (!this.value) {
+                    this.parentElement.classList.remove('focused');
+                }
+            });
+        });
+    </script>
+}

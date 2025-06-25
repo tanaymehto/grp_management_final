@@ -1,0 +1,192 @@
+@page
+@model DashboardModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-lg-7 mb-4">
+            <div class="card glass-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Daily Message Count (Last 7 Days)</h5>
+                    <div style="height: 300px;">
+                        <canvas id="dailyMessageChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5 mb-4">
+            <div class="card glass-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Group Approval Status</h5>
+                    <div style="height: 300px;">
+                        <canvas id="groupApprovalChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-7 mb-4">
+            <div class="card glass-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Monthly Message Count</h5>
+                    <div style="height: 300px;">
+                        <canvas id="monthlyMessageChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5 mb-4">
+            <div class="card glass-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Messages by Sent Via</h5>
+                    <div style="height: 300px;">
+                        <canvas id="sentViaChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card glass-card">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Messages</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="recentMessagesTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Group</th>
+                                    <th>Sent Via</th>
+                                    <th>Message</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const monthlyMessageCounts = @Html.Raw(Json.Serialize(Model.MonthlyMessageCounts));
+        const messagesBySentVia = @Html.Raw(Json.Serialize(Model.MessagesBySentViaChartData));
+        const groupApprovalData = @Html.Raw(Json.Serialize(Model.GroupApprovalChartData));
+        const dailyMessageData = @Html.Raw(Json.Serialize(Model.DailyMessageCounts));
+        const recentMessages = @Html.Raw(Json.Serialize(Model.RecentMessages));
+
+        const computedStyle = getComputedStyle(document.documentElement);
+        const textColor = computedStyle.getPropertyValue('--text-color').trim();
+        const gridColor = 'rgba(128, 128, 128, 0.2)';
+
+        const barLineChartOptions = {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: textColor } } },
+            scales: {
+                y: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridColor } },
+                x: { ticks: { color: textColor }, grid: { color: gridColor } }
+            }
+        };
+        const pieChartOptions = {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'top', labels: { color: textColor } } }
+        };
+
+        // Daily Message Count (Line Chart)
+        if (dailyMessageData && Object.keys(dailyMessageData).length > 0) {
+            new Chart(document.getElementById('dailyMessageChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: Object.keys(dailyMessageData),
+                    datasets: [{
+                        label: 'Messages', data: Object.values(dailyMessageData),
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)', borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1, fill: true
+                    }]
+                }, options: barLineChartOptions
+            });
+        }
+        
+        // Group Approval (Pie Chart)
+        if (groupApprovalData && Object.values(groupApprovalData).some(v => v > 0)) {
+            new Chart(document.getElementById('groupApprovalChart').getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: ['Approved', 'Pending', 'Rejected'],
+                    datasets: [{
+                        data: [groupApprovalData.Approved, groupApprovalData.Pending, groupApprovalData.Rejected],
+                        backgroundColor: ['rgba(75, 192, 192, 0.8)', 'rgba(255, 206, 86, 0.8)', 'rgba(255, 99, 132, 0.8)'],
+                    }]
+                }, options: pieChartOptions
+            });
+        }
+
+        // Monthly Message Count (Bar Chart)
+        if (monthlyMessageCounts && Object.keys(monthlyMessageCounts).length > 0) {
+            new Chart(document.getElementById('monthlyMessageChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(monthlyMessageCounts),
+                    datasets: [{
+                        label: 'Messages', data: Object.values(monthlyMessageCounts),
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)', borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                }, options: barLineChartOptions
+            });
+        }
+
+        // Messages by Sent Via (Bar Chart)
+        if (messagesBySentVia && Object.keys(messagesBySentVia).length > 0) {
+            new Chart(document.getElementById('sentViaChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(messagesBySentVia),
+                    datasets: [{
+                        label: 'Count', data: Object.values(messagesBySentVia),
+                        backgroundColor: ['rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)', 'rgba(255, 205, 86, 0.6)', 'rgba(75, 192, 192, 0.6)'],
+                    }]
+                }, options: barLineChartOptions
+            });
+        }
+
+        // Populate Recent Messages Table
+        const recentMessagesTableBody = document.querySelector('#recentMessagesTable tbody');
+        recentMessagesTableBody.innerHTML = '';
+        if (recentMessages && recentMessages.length > 0) {
+            recentMessages.forEach(msg => {
+                const row = recentMessagesTableBody.insertRow();
+                row.insertCell().textContent = new Date(msg.sentDate).toLocaleString();
+                row.insertCell().textContent = msg.groupName;
+                row.insertCell().textContent = msg.sentVia;
+                row.insertCell().textContent = msg.messageContent;
+                
+                const statusCell = row.insertCell();
+                const statusBadge = document.createElement('span');
+                statusBadge.textContent = msg.status;
+                statusBadge.className = 'badge';
+                if (msg.status === 'Sent') statusBadge.classList.add('bg-success');
+                else if (msg.status === 'Pending') statusBadge.classList.add('bg-warning');
+                else statusBadge.classList.add('bg-danger');
+                statusCell.appendChild(statusBadge);
+            });
+        } else {
+            const row = recentMessagesTableBody.insertRow();
+            const cell = row.insertCell();
+            cell.colSpan = 5;
+            cell.textContent = 'No recent messages to display.';
+            cell.className = 'text-center';
+        }
+    });
+    </script>
+} 

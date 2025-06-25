@@ -1,0 +1,29 @@
+        <h3>My Groups</h3>
+        @if (Model.MyGroups != null && Model.MyGroups.Any())
+        {
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Group Name</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var group in Model.MyGroups)
+                {
+                    <tr>
+                        <td>@group.Name</td>
+                        <td>@group.Description</td>
+                        <td>@group.Status</td>
+                        <td>@group.Reason</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="text-muted">You are not a member of any groups.</div>
+        } 

@@ -1,0 +1,114 @@
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #fff;
+    margin: 0;
+}
+
+.login-page {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('../Industry_in_deosar_tehsil.jpeg');
+    background-size: cover;
+    background-position: center;
+}
+
+.login-container {
+    max-width: 420px;
+    width: 100%;
+    padding: 30px;
+    background-color: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.login-title {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.app-name {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.form-label {
+    color: #f0f0f0;
+    font-weight: 500;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.form-control::placeholder {
+    color: #ccc;
+}
+
+.form-control:focus {
+    border-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 10px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.alert-danger {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    background-color: rgba(220, 53, 69, 0.8);
+    border: 1px solid rgba(220, 53, 69, 1);
+    color: #fff;
+}
+
+.text-danger {
+    color: #ff8a8a !important; /* Lighter red for better contrast on dark bg */
+    font-size: 0.9em;
+}
+
+.header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+}
+
+.logo-left {
+    height: 80px; 
+    margin-left: 30px;
+}
+
+.logo-right {
+    height: 80px;
+    margin-right: 30px;
+} 

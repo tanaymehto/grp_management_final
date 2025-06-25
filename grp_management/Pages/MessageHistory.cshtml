@@ -1,0 +1,239 @@
+@page
+@model grp_management.Pages.MessageHistoryModel
+@{
+    ViewData["Title"] = "Message History";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Message History</h2>
+        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#searchModal">
+            <i class="fas fa-filter me-2"></i>Filters
+        </button>
+    </div>
+
+    @* Search Modal *@
+    <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content glass-card">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="searchModalLabel">Filter Message History</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="get" class="row g-3 align-items-center">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="searchGroup" name="searchGroup" value="@Model.SearchGroup" placeholder="Search Group">
+                                <label for="searchGroup">Search Group</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="searchMessage" name="searchMessage" value="@Model.SearchMessage" placeholder="Search Message">
+                                <label for="searchMessage">Search Message</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <select class="form-select" id="searchStatus" name="searchStatus">
+                                    <option value="">All Status</option>
+                                    <option value="Sent" selected="@(Model.SearchStatus == "Sent")">Sent</option>
+                                    <option value="Pending" selected="@(Model.SearchStatus == "Pending")">Pending</option>
+                                    <option value="Failed" selected="@(Model.SearchStatus == "Failed")">Failed</option>
+                                </select>
+                                <label for="searchStatus">Status</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <select class="form-select" id="searchSentVia" name="searchSentVia">
+                                    <option value="">All Methods</option>
+                                    <option value="Email" selected="@(Model.SearchSentVia == "Email")">Email</option>
+                                    <option value="SMS" selected="@(Model.SearchSentVia == "SMS")">SMS</option>
+                                    <option value="WhatsApp" selected="@(Model.SearchSentVia == "WhatsApp")">WhatsApp</option>
+                                </select>
+                                <label for="searchSentVia">Sent Via</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="date" class="form-control" id="searchDate" name="searchDate" value="@Model.SearchDate?.ToString("yyyy-MM-dd")">
+                                <label for="searchDate">Date</label>
+                            </div>
+                        </div>
+                         <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Search
+                            </button>
+                             <a href="@Url.Page("/MessageHistory")" class="btn btn-secondary ms-2">
+                                <i class="fas fa-redo me-2"></i>Reset
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="card glass-card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="messageHistoryTable">
+                    <thead>
+                        <tr>
+                            <th>Sent Date</th>
+                            <th>Group</th>
+                            <th>Sent Via</th>
+                            <th>Message Template</th>
+                            <th>Variables</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var message in Model.Messages)
+                        {
+                            <tr>
+                                <td>@message.SentDate.ToString("g")</td>
+                                <td>@message.SentTo</td>
+                                <td>@message.SentVia</td>
+                                <td>@message.MessageTemplate</td>
+                                <td>
+                                    @if (message.Variables != null)
+                                    {
+                                        <ul class="list-unstyled">
+                                            @foreach (var variable in message.Variables)
+                                            {
+                                                <li><strong>@variable.Key:</strong> @variable.Value</li>
+                                            }
+                                        </ul>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge @(message.Status switch {
+                                        "Sent" => "bg-success",
+                                        "Pending" => "bg-warning",
+                                        "Failed" => "bg-danger",
+                                        _ => "bg-secondary"
+                                    })">
+                                        @message.Status
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
+    <div id="msgToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="msgToastBody"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .glass-card {
+        background-color: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.125);
+    }
+    .glass-card .card-body, .glass-card .modal-header, .glass-card .modal-body, .glass-card .modal-footer {
+        color: var(--text-color);
+    }
+    .form-control, .form-select {
+        background-color: var(--input-bg);
+        border: 1px solid var(--input-border);
+        color: var(--input-text);
+    }
+    .form-control:focus, .form-select:focus {
+        background-color: var(--input-bg);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem var(--primary-color-shadow-alpha);
+        color: var(--input-text);
+    }
+    .form-floating > label {
+        color: var(--text-color-faded);
+    }
+    .form-floating > .form-control:focus ~ label,
+    .form-floating > .form-control:not(:placeholder-shown) ~ label,
+    .form-floating > .form-select ~ label {
+        color: var(--text-color);
+    }
+    .table {
+        color: var(--text-color);
+    }
+    .table thead th {
+        border-bottom-color: var(--table-border);
+    }
+    .table td {
+        border-top-color: var(--table-border);
+    }
+</style>
+
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/messageHub")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("ReceiveMessageUpdate", (message) => {
+            const tbody = document.querySelector("#messageHistoryTable tbody");
+            const row = document.createElement("tr");
+            
+            // Build variables list
+            let variablesHtml = '<ul class="list-unstyled">';
+            if (message.variables) {
+                for (const [key, value] of Object.entries(message.variables)) {
+                    variablesHtml += `<li><strong>${key}:</strong> ${value}</li>`;
+                }
+            }
+            variablesHtml += '</ul>';
+            
+            row.innerHTML = `
+                <td>${new Date(message.sentDate).toLocaleString()}</td>
+                <td>${message.sentTo}</td>
+                <td>${message.sentVia}</td>
+                <td>${message.messageTemplate}</td>
+                <td>${variablesHtml}</td>
+                <td>
+                    <span class="badge ${getStatusClass(message.status)}">
+                        ${message.status}
+                    </span>
+                </td>
+            `;
+            tbody.insertBefore(row, tbody.firstChild);
+            showMsgToast(message.status === "Sent" ? "Message sent successfully!" : "Message failed!", 
+                         message.status === "Sent" ? "success" : "danger");
+        });
+
+        function getStatusClass(status) {
+            switch (status) {
+                case "Sent": return "bg-success";
+                case "Pending": return "bg-warning";
+                case "Failed": return "bg-danger";
+                default: return "bg-secondary";
+            }
+        }
+
+        function showMsgToast(msg, type) {
+            const toast = document.getElementById('msgToast');
+            const toastBody = document.getElementById('msgToastBody');
+            toastBody.textContent = msg;
+            toast.className = `toast align-items-center text-white border-0 bg-${type}`;
+            const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+            bsToast.show();
+        }
+
+        connection.start().catch(err => console.error(err));
+    </script>
+}

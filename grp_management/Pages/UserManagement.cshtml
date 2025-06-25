@@ -1,0 +1,114 @@
+@page
+@model grp_management.Pages.UserManagementModel
+@{
+    ViewData["Title"] = "User Management";
+}
+
+@Html.AntiForgeryToken()
+<div class="container mt-4">
+    <h1>User Management</h1>
+    <div class="mb-3">
+        <span class="fw-bold">Total Users: </span>@Model.Users.Count
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Groups</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.Users)
+                {
+                    <tr>
+                        <td>@user.Username</td>
+                        <td>@user.Email</td>
+                        <td>@user.Role</td>
+                        <td>
+                            <span class="badge bg-info">@Model.UserGroupCounts[user.Id]</span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" data-user-id="@user.Id" onclick="selectUser(@user.Id)">Manage</button>
+                            <form method="post" asp-page-handler="DeleteUser" asp-route-id="@user.Id" class="d-inline" onsubmit="return confirm('Delete this user?');">
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div id="userDetailsSection">
+        @if (Model.SelectedUser != null)
+        {
+            <h3>Manage User: @Model.SelectedUser.Username</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Groups in</h5>
+                    <ul class="list-group mb-3">
+                        @foreach (var group in Model.SelectedUserGroups)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @group.Name
+                                <form method="post" asp-page-handler="RemoveFromGroup" class="d-inline">
+                                    <input type="hidden" name="userId" value="@Model.SelectedUser.Id" />
+                                    <input type="hidden" name="groupId" value="@group.Id" />
+                                    <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                                </form>
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5>Add to Groups</h5>
+                    <ul class="list-group mb-3">
+                        @foreach (var group in Model.AvailableGroupsToAdd)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @group.Name
+                                <form method="post" asp-page-handler="AddToGroup" class="d-inline">
+                                    <input type="hidden" name="userId" value="@Model.SelectedUser.Id" />
+                                    <input type="hidden" name="groupId" value="@group.Id" />
+                                    <button type="submit" class="btn btn-sm btn-success">Add</button>
+                                </form>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function selectUser(userId) {
+        var form = document.createElement('form');
+        form.method = 'post';
+        form.action = '?handler=SelectUser';
+
+        // Add anti-forgery token
+        var token = document.querySelector('input[name="__RequestVerificationToken"]');
+        if (token) {
+            var tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '__RequestVerificationToken';
+            tokenInput.value = token.value;
+            form.appendChild(tokenInput);
+        }
+
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'userId';
+        input.value = userId;
+        form.appendChild(input);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
+} 
